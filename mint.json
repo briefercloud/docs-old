@@ -2,8 +2,8 @@
     "$schema": "https://mintlify.com/schema.json",
     "name": "Docs",
     "logo": {
-        "dark": "/logo/dark.svg",
-        "light": "/logo/light.svg"
+        "dark": "/logo/dark.png",
+        "light": "/logo/light.png"
     },
     "favicon": "/favicon.png",
     "colors": {
@@ -20,20 +20,19 @@
     },
     "topbarLinks": [
         {
+            "name": "Dashboard",
+            "url": "https://app.ergomake.dev"
+        },
+        {
             "name": "Support",
             "url": "mailto:contact@ergomake.dev"
         }
     ],
     "topbarCtaButton": {
-        "name": "Login",
-        "url": "https://app.ergomake.dev"
+        "type": "github",
+        "url": "https://github.com/ergomake/ergomake"
     },
     "anchors": [
-        {
-            "name": "Documentation",
-            "icon": "book-open-cover",
-            "url": "https://docs.ergomake.dev"
-        },
         {
             "name": "Community",
             "icon": "discord",
@@ -64,6 +63,12 @@
     "footerSocials": {
         "twitter": "https://twitter.com/GetErgomake",
         "github": "https://github.com/ergomake/ergomake",
-        "linkedin": "https://www.linkedin.com/company/ergomake"
+        "linkedin": "https://www.linkedin.com/company/ergomake",
+        "discord": "https://discord.gg/daGzchUGDt"
+    },
+    "analytics": {
+        "plausible": {
+            "domain": "docs.ergomake.dev"
+        }
     }
 }
