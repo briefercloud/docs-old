@@ -47,16 +47,20 @@
     "navigation": [
         {
             "group": "Get Started",
-            "pages": ["introduction", "quickstart", "development"]
+            "pages": ["introduction"]
         },
         {
-            "group": "Essentials",
+            "group": "Configurations",
             "pages": [
-                "essentials/markdown",
-                "essentials/code",
-                "essentials/images",
-                "essentials/settings",
-                "essentials/navigation"
+                "configurations/your-first-preview",
+                "configurations/dockerfiles",
+                "configurations/environment-variables",
+                "configurations/multiple-repos",
+                "configurations/third-party-software",
+                "configurations/networking",
+                "configurations/seeding",
+                "configurations/managing-resources",
+                "configurations/troubleshooting"
             ]
         }
     ],

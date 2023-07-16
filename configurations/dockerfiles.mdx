@@ -1,0 +1,111 @@
+---
+id: writing-dockerfiles
+title: Writing Dockerfiles
+icon: "whale"
+---
+
+## Writing Dockerfiles for your `docker-compose.yml`
+
+When writing the `docker-compose.yml` file, you'll notice that you must write a `Dockerfile` for your appplication so that you can reference it in your compose file.
+
+Just as you'd do when containerizing your app for any other circumstances, this `Dockerfile` should package your application within a [container image](https://docs.docker.com/get-started/#what-is-a-container-image) so that the application starts when you `docker run` a container using that image.
+
+<Tip>
+    If you're not familiar with Docker, we highly recommend reading [Docker's
+    official "Get Started" page](https://docs.docker.com/get-started).
+</Tip>
+
+A typical Node.js Express app, for example, would have a `Dockerfile` similar to the one below.
+
+```Dockerfile
+FROM node:16-alpine
+
+WORKDIR /usr/src/app
+
+# Install your app's dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the application code itself
+COPY . .
+
+# This is the port to which you'll bind Express
+EXPOSE 3001
+
+# Start the server
+CMD ["node", "server.js"]
+```
+
+Once you've created a Dockerfile for your app, reference it in your `docker-compose.yml`, as shown below.
+
+```yaml
+version: "3.8"
+services:
+    api:
+        build: ../path_to_your_dockerfile_folder
+        ports:
+            - "3001:3001"
+```
+
+Once you do that, Ergomake Bot will add a comment containing a link to your application.
+
+By now, you should have a preview environment up and running for your application.
+
+That's good, but most applications depend on multiple other pieces of software, like databases. To learn how to set them up, see _[Databases and other third-party applications](./third-party-software.md)_.
+
+## When to write a Dockerfile
+
+Usually, you'll only have to write a `Dockerfile` for applications you _own_ and for which there isn't a built image yet.
+
+Take it as a rule-of-thumb that you should _not_ write `Dockerfile` for applications such as databases, or message queues. For those applications, you should usually default to picking an image from [Docker Hub](https://hub.docker.com/), which is Docker's official image repository.
+
+We recommend that users only write Dockerfiles when they can't find the software they need packed into a Docker Hub image.
+
+<Tip>
+    If your integrations already build a Docker image as part of your
+    pull-request process, we recommend that you reuse that image so that preview
+    environments come up more quickly.
+</Tip>
+
+## Setting build arguments
+
+There will be cases in which a Dockerfile needs to have access to a particular service's address during build-time. One such example is when you must bundle a front-end app including the value for the back-end address to which the web app will send requests, as shown in the example Dockerfile below.
+
+```
+FROM node:16-alpine
+
+ARG REACT_APP_API_URL
+
+ENV REACT_APP_API_URL $REACT_APP_API_URL
+
+# A bunch of other commands [...]
+
+RUN npm run build
+
+EXPOSE 8080
+CMD ["npm", "run", "start-docker"]
+```
+
+In this example, we use the `REACT_APP_API_URL` build argument to set the environment variable `REACT_APP_API_URL`. This variable will be used during `npm run build` because it will go into the bundle so that the app knows what's the backend to which it should send requests.
+
+**To provide a build argument containing service's public address, you'll use the `dev.ergomake.preview.replace-arg.YOUR_ENV_VAR` label.** Within that var, you can interpolate the address we'll generate for a service, as shown in the example below.
+
+```yml
+version: '3.8'
+services:
+   web:
+     build:
+       context: ./frontend
+     ports:
+       - "8080:8080"
+     labels:
+       # This label will cause Ergomake to set, during build time,
+       # REACT_APP_API_URL to the address of the API service (https),
+       # followed by "/prefix"
+       dev.ergomake.env.replace-arg.REACT_APP_API_URL: 'https://{{ services.api.url }}/api'
+
+  api:
+    build: ./backend
+    ports:
+      - '3001:3001'
+```

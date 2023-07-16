@@ -1,0 +1,70 @@
+---
+id: multiple-repos
+title: Using multiple repositories
+description: Learn how to setup Ergomake if you need to spin-up previews with multiple repos
+icon: "rectangle-vertical-history"
+---
+
+Ergomake can spin-up previews with applications from multiple repositories.
+
+Imagine, for example, that you have a `frontend` repository which sends requests to a `backend` repository.
+
+In that case, if you want your pull-requests on the `frontend` repository to include an instance of the `backend` application, you can reference it on your compose as if it was in an external folder, as shown in the example below.
+
+```yml
+# Here's an example docker-compose.yml file that goes in the `frontend` repo
+version: "3.8"
+services:
+    web:
+        build: ../frontend
+        ports:
+            - "8080:8080"
+
+    # You can build a second repository by referencing a folder with
+    # the desired repository name in a path *outside* your current repository.
+    api:
+        build: ../../backend
+        ports:
+            - "3001:3001"
+
+    database:
+        image: mongo
+        environment:
+            MONGODB_INITDB_ROOT_USERNAME: username
+            MONGODB_INITDB_ROOT_PASSWORD: password
+```
+
+After you commit this file to your `.ergomake` folder, every pull-request in the `frontend` repository will build the `Dockerfile` in the `backend` repository and include it in your preview environment.
+
+If you want your back-end repository to include the `frontend` repository, you'll have to commit a similar compose file to the `backend` repository. This time, however, you'll refer to the `frontend` repo as an external folder, as shown below
+
+```yml
+# Here's an example docker-compose.yml file that goes in the `backend` repo
+version: "3.8"
+services:
+    web:
+        build: ../../frontend
+        ports:
+            - "8080:8080"
+
+    api:
+        build: ../backend
+        ports:
+            - "3001:3001"
+
+    database:
+        image: mongo
+        environment:
+            MONGODB_INITDB_ROOT_USERNAME: username
+            MONGODB_INITDB_ROOT_PASSWORD: password
+```
+
+By default, Ergomake will use either branches with the same names or `main`, if an eponymous branch does not exist.
+
+## Environments with pending branches
+
+When you have pending changes in both repositories, you can ensure that the previews for your branch will use pending changes in both sides. For that, you just need to give branches the same names.
+
+Assume you're doing changes to your front-end on a branch called `my-feature`. If those changes depend on changes from the back-end which haven't yet been merged, you can push a branch called `my-feature` to your back-end repository too.
+
+Then, when you open your front-end pull-request, the preview environment will use the back-end changes from `my-feature` instead of `main`.

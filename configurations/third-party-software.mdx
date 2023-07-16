@@ -1,0 +1,121 @@
+---
+id: third-party-software
+title: Databases and other third-party software
+description: Learn how to set up databases and other pieces of third-party software upon which your preview environment depends.
+icon: "database"
+---
+
+To set up a database or any other pieces of third-party software, you just need to add them to the same `docker-compose.yml` you're using for Ergomake environments.
+
+These pieces of third-party software are usually available on Docker Hub images already. Therefore, you can just tell Docker Compose to pull them and fill the necessary environment variables.
+
+<Note>
+    To learn how to seed your databases, see _[Seeding
+    Databases](./seeding.md)_.
+</Note>
+
+In the example below, you can see we added a MongoDB instance to our application environment.
+
+```yaml
+version: "3.8"
+services:
+    api:
+        build: ./backend
+        ports:
+            - "3001:3001"
+
+    database:
+        image: mongo
+        ports:
+            - "27017"
+        environment:
+            MONGODB_INITDB_ROOT_USERNAME: username
+            MONGODB_INITDB_ROOT_PASSWORD: password
+```
+
+With that, we can now connect our API to the MongoDB instance by updating the API's service and adding environment variables pointing to this MongoDB instance.
+
+```yaml
+version: "3.8"
+services:
+    api:
+        build: ./backend
+        ports:
+            - "3001:3001"
+        environment:
+            DB_HOSTNAME: mongo
+            DB_PORT: 27017
+            DB_USERNAME: username
+            DB_PASSWORD: changeme
+            DB_NAME: my-database
+
+    database:
+        image: mongo
+        ports:
+            - "27017"
+        environment:
+            MONGODB_INITDB_ROOT_USERNAME: username
+            MONGODB_INITDB_ROOT_PASSWORD: changeme
+            MONGO_INITDB_DATABASE: my-database
+```
+
+Now, as long as the API itself uses those environment variables to connect to the database, everything should work. Below, you can see an example of how you'd use these environment variables to connect to the database.
+
+```js
+import { MongoClient } from "mongodb";
+
+const { DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_PORT, DB_NAME } = process.env;
+
+const url = `mongodb://${DB_USERNAME}:${DB_PASSWORD}@{DB_HOSTNAME}:${DB_PORT}`;
+const client = new MongoClient(url);
+
+async function main() {
+    await client.connect();
+    const db = client.db(DB_NAME);
+    return "Connected to MongoDB.";
+}
+
+main()
+    .then(console.log)
+    .catch(console.error)
+    .finally(() => client.close());
+```
+
+Once you have a `docker-compose.yml` file, you can run `docker-compose up` to ensure your application works on your machine. If it does, you're ready to commit your `docker-compose.yml` file and start using preview environments. Remember: whatever you can run locally with Docker Compose, you can also run on the cloud.
+
+Now, whenever you open a pull-request, Ergomake will spin-up a cloud environment that's just like your local one. Then, the Ergomake Bot will add a comment to your pull-request containing a link to that environment.
+
+From there on, you can already `cURL` your API using the URL sent by the Ergomake Bot or connect a local front-end app to it, for example.
+
+### Public and private services
+
+**To expose an application to the internet in your preview environment, you must bind the container's target port to a `localhost` port**, just as you'd do with a local `docker-compose.yml`.
+
+Once you do that, **Ergomake will always expose the _first_ bound port in your service's `ports` attribute**.
+
+In the example above, our back-end's port `3001` is publicly accessible because it's the first bound port for the `backend` service. On the other hand, that MongoDB instance isn't exposed to the internet.
+
+<Tip>
+    By default, **on preview environments**, you should hide any applications to
+    which you don't need public access, like databases or queueing systems.
+</Tip>
+
+To expose your MongoDB instance to the world, bind the container's `27017` port to a `localhost` port, as shown below.
+
+```yaml
+version: "3.8"
+services:
+    api:
+        build: ./backend
+        ports:
+            - "3001:3001"
+
+    database:
+        image: mongo
+        # Ergomake will now expose the MongoDB instance to the internet
+        ports:
+            - "27017:27017"
+        environment:
+            MONGODB_INITDB_ROOT_USERNAME: username
+            MONGODB_INITDB_ROOT_PASSWORD: password
+```

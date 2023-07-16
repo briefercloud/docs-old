@@ -1,0 +1,180 @@
+---
+id: seeding
+title: Seeding data
+description: How to seed your databases.
+icon: "seeding"
+---
+
+We currently recommend that you incorporate seed scripts into your images. Another way to seed your environments is to create a separate service on your compose file.
+
+## Building images with seeds
+
+In most cases, using a built image with a seed script is the easiest way to seed a preview environment.
+
+### Mongo example
+
+If you're using MongoDB, you can create a `Dockerfile` using the `mongo` image as the base image, and copy the necessary seed files to the `/docker-entrypoint-initdb.d` path within that image. Any files within that path will be automatically executed by the image when the `mongo` service starts.
+
+Assume you have the seed script below, named `seed.js` within a `scripts` folder, for example.
+
+```js
+db.test.drop();
+db.test.insertMany([
+    {
+        _id: 1,
+        name: "Alice",
+        age: 50,
+    },
+    {
+        _id: 2,
+        name: "Bob",
+        age: 75,
+    },
+]);
+```
+
+In that case, you'll simply configure your `Dockerfile` so that the JavaScript file is copied to `/docker-entrypoint-initdb.d` when building the image.
+
+```
+FROM mongo:3.6
+
+COPY ./scripts/seed.js /docker-entrypoint-initdb.d
+```
+
+Finally, you'll reference this `Dockerfile` in the `docker-compose.yml` file used by Ergomake.
+
+```yaml
+version: "3"
+
+services:
+    db:
+        build:
+            context: ../mongo
+            dockerfile: Dockerfile
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: { { USERNAME } }
+            MONGO_INITDB_ROOT_PASSWORD: { { PWD } }
+            MONGO_INITDB_DATABASE: { { DBNAME } }
+```
+
+<Note>
+In this example, we assume the following file-tree structure:
+
+```
+.
+├──── .ergomake
+│   └── docker-compose.yml <--- Used by Ergomake
+└──── mongo
+    ├── Dockerfile
+    └── scripts
+        └── seed.js
+```
+
+</Note>
+
+### Postgres Example
+
+If you're using the [`postgres`](https://hub.docker.com/_/postgres/) image, you can simply copy your seed scripts to `/docker-entrypoint-initb.d`. That's because the image is configured to execute any files within that directory when the `postgres` service starts.
+
+Assume you had the seed script below, named `dump.sql`, within a `scripts` folder.
+
+```sql
+CREATE TABLE IF NOT EXISTS users (
+  "id" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "email" TEXT NOT NULL,
+
+  PRIMARY KEY ("id")
+);
+
+INSERT INTO users (id, name, email) VALUES ('a123', 'My Name', 'name@example.com');
+```
+
+In that case, you'd first create a script to run it, let's say `seed.sh`, within that same `scripts` folder.
+
+```
+#!/bin/bash
+
+psql -U $POSTGRES_USER -d $POSTGRES_DB -a -f /app/scripts/db/dump.sql
+```
+
+Then, you'd configure your `Dockerfile` to copy `seed.sh` the `dump.sql` to `docker-entrypoint-initdb.d`, as shown below.
+
+```
+FROM postgres:12
+COPY ./scripts/init.sh /docker-entrypoint-initdb.d
+COPY ./scripts/dump.sql ./scripts/db/dump.sql
+```
+
+Finally, you'll reference that `Dockerfile` in the `docker-compose.yml` you use for Ergomake.
+
+```yaml
+services:
+    db:
+        build:
+            context: ../postgres
+            dockerfile: Dockerfile
+        environment:
+            - POSTGRES_USER=user
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=database
+        ports:
+            - 5432:5432
+```
+
+<Note>
+In this example, we assume the following file-tree structure:
+
+```
+.
+├──── .ergomake
+│   └── docker-compose.yml <--- Used by Ergomake
+└──── postgres
+    ├── Dockerfile
+    └── scripts
+        ├── dump.sql
+        └── seed.sh
+```
+
+</Note>
+
+## Seeding environments with services
+
+To seed an environment with a separate service, all you need to do is create a separate service in your compose and change its command so that it runs the seed command.
+
+```
+version: '3.8'
+services:
+  api:
+    build: ../backend
+    ports:
+      - '3001:3001'
+
+  seed:
+    build: ../backend
+    # Instead of running your image's command, you can use this one to override it
+    command: ./my-seed-script.sh
+    ports:
+      - '3001:3001'
+```
+
+Another way to seed it and still have a single service is to use multiple commands on your compose.
+
+```
+version: '3.8'
+services:
+  api:
+    build: ../backend
+    # Here you'll run both your seed and your app
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - '3001:3001'
+```
+
+<Warning>
+Make sure that restarting your service will not cause the seed command to fail. That could happen if you're trying to create a database that already exists every time your seed script runs.
+
+Make sure that your `command` can run multiple times without errors so that your preview environments stay up.
+
+</Warning>

@@ -1,0 +1,82 @@
+---
+id: environment-variables
+title: Environment variables and secrets
+description: How to manage environment variables for build and runtime.
+icon: "key"
+---
+
+There are two types of environment variables: build-time and runtime variables.
+
+Build-time variables are those used when _building_ your images. These are usually URLs, options, or non-sensitive data.
+
+Runtime variables are used when _running_ your images. Keys for third-party APIs and other sensitive data must be a runtime variable.
+
+## Configuring build-time variables
+
+Assume your front-end app needs the `REACT_APP_API_URL` so it knows the back-end address to send requests to.
+
+In that case, your `Dockerfile` must take an `ARG` and assign the value of that arg to the `REACT_APP_API_URL` environment variable, as shown below
+
+```
+FROM node:16-alpine
+
+# This is an argument which we'll use to set
+# an environment variable for when the image runs
+ARG REACT_APP_API_URL
+
+# The value of REACT_APP_API_URL will be
+# baked _into_ the image
+ENV REACT_APP_API_URL $REACT_APP_API_URL
+
+# Now, REACT_APP_API_URL will be used in the build
+RUN npm run build
+
+```
+
+Then, to fill that environment variable with the actual URL for the back-end in each preview (which will change from PR to PR), use the `dev.ergomake.env.replace-arg.REACT_APP_API_URL`. Within that label, we can interpolate the URL of each service using `services.<SERVICE_NAME>.url`, as shown below.
+
+```yml
+# Here's an example docker-compose.yml file
+version: "3.8"
+services:
+  # On pull-requests, Ergomake can build your own images
+  web:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+     labels:
+       # This label will cause Ergomake to set, during build time,
+       # REACT_APP_API_URL to the address of the API service (https),
+       # followed by "/prefix"
+       dev.ergomake.env.replace-arg.REACT_APP_API_URL: 'https://{{ services.api.url }}/api'
+
+  # You can build a second repository by referencing a folder with
+  # the desired repository name in a path *outside* your current repository.
+  api:
+    build: ../../my-backend-repo
+    ports:
+      - "3001:3001"
+```
+
+<Note>
+    Build-time variables are built _into_ the resulting image. Therefore, you
+    should avoid using secrets as build-time variables.
+</Note>
+
+## Configuring runtime variables
+
+You should set third-party API keys and other sensitive information as runtime variables.
+
+These secrets and environment variables usually come in the form of a `.env` file.
+
+<Note>
+    If you have an `.env` file, please do _not_ use it in your
+    `docker-compose.yml` file, unless you commit that file to your `repository`
+    — which you probably shouldn't do.
+</Note>
+
+To configure these runtime environment variables, you must select the repository for which you want the runtime variables to be set. Then, you should click the "Environment Variables" tab on the upper right corner, and add the desired variable.
+
+![](../../static/img/manage-variables.png)
+
+<Info>All runtime variables are encrypted at rest.</Info>

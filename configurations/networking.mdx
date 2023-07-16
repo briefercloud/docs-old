@@ -1,0 +1,139 @@
+---
+id: networking
+title: Networking
+description: How ergomake routes requests to and within environments.
+icon: "network-wired"
+---
+
+In this page, you'll learn how applications within Ergomake find each other, how Ergomake decides whether to expose services, and, if so, which port to use.
+
+You'll also learn how to use environment URLs during build-time for previews. That may be useful when bundling front-end apps and packaging them into containers.
+
+## Exposing services or making them private
+
+**Ergomake will expose to the internet the first container port bound to a `localhost` port on your `docker-compose.yml`**.
+
+For example, if you bind a container's `3000` port to a port on `localhost`, Ergomake will expose port `3000` to the internet when deploying your that service in your preview environment.
+
+Take the `api` and `database` services below, for example.
+
+```yml
+version: "3.8"
+services:
+    api:
+        build: ./backend
+        ports:
+            - 8080:3001
+            - 8081:9001
+
+    database:
+        image: mongo
+        ports:
+            - 13337:27017
+```
+
+As shown above, the API service binds the container's `3001` port to `localhost:8080`. Consequently, Ergomake will expose the container's `3001` port over the internet.
+
+Similarly, Ergomake will also expose the `database`'s `27017` port over the internet when creating your environment.
+
+Here's what the URLs to reach `api` and `database` would look like in the above scenario, respectively:
+
+-   `api`: `https://api-yourOrg-yourRepo-prNumber.env.ergomake.link`
+-   `database`: `https://database-yourOrg-yourRepo-prNumber.env.ergomake.link`
+
+Although the port `9001` for the `api` service is exposed within `localhost`, it won't be exposed to the internet. That's because only the first bound port will be exposed to the internet.
+
+<Note>Please notice these addresses are only available over HTTP(S).</Note>
+
+## Inter-service routing
+
+Containers within your preview environment will talk to each other using the same hostnames they would use on your machine when you run them with Docker Compose.
+
+That means a service named `api` can address a service named `database` by using `database` as the hostname.
+
+Assume, for example, that you have a service named `api` containing a Node.js application. The `api` service connects to a MongoDB instance within a service named `mongo`.
+
+```yml
+# Here's an example docker-compose.yml file
+version: "3.8"
+services:
+    api:
+        build: ./backend
+        ports:
+            - "3001:3001"
+
+    database:
+        image: mongo
+        ports:
+            - "27017"
+```
+
+In that case, you can connect to MongoDB using `mongo` as the hostname within your Node.js application.
+
+```js
+import { MongoClient } from "mongodb";
+
+// This is MongoDB's default port
+const DB_PORT = 27017;
+
+// To address the MongoDB instance within the `mongo` service, we use its name
+const url = `mongodb://mongo:${DB_PORT}`;
+const client = new MongoClient(url);
+
+async function main() {
+    await client.connect();
+}
+```
+
+<Note>
+    It may be that you're exposing ports so that you can use `localhost` to
+    connect to them. Exposing services so that you can connect to them via
+    `localhost` will _not_ work because `localhost` does not exist for Ergomake.
+    Please make sure to always use your service's names when connecting to them.
+</Note>
+
+## Routing and front-end apps
+
+When bundling a front-end app, many people use an environment variable to indicate the address of the API to which the front-end app will send requests.
+
+To configure that URL, many front-end apps must include the back-end's URL during build-time.
+
+As an example, assume you have a React app and that app uses the `REACT_APP_API_URL` during build time, as shown below.
+
+```Dockerfile
+FROM node:16-alpine
+
+ARG REACT_APP_API_URL
+
+ENV REACT_APP_API_URL $REACT_APP_API_URL
+
+# A bunch of other commands [...]
+
+RUN npm run build
+
+EXPOSE 8080
+CMD ["npm", "run", "start-docker"]
+```
+
+When building the app's bundle within a Docker image, you'll have to tell Ergomake to set the `REACT_APP_API_URL` build argument with the address we'll generate for `api`. That build argument will be used to set the `REACT_APP_API_URL` environment variable that `npm run build` uses when bundling the React app.
+
+To do that, you'll use the `dev.ergomake.env.replace-arg.YOUR_ENV_VAR` label. Within that label, you can interpolate the address we'll generate for the `api` service, as shown in the example below.
+
+```yml
+version: '3.8'
+services:
+   web:
+     build:
+       context: ./frontend
+     ports:
+       - "8080:8080"
+     labels:
+       dev.ergomake.env.replace-arg.REACT_APP_API_URL: 'https://{{ services.api.url }}'
+
+  api:
+    build: ./backend
+    ports:
+      - '3001:3001'
+```
+
+After doing that, Ergomake will use the label's value as the build argument `REACT_APP_API_URL` when creating your image.

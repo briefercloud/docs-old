@@ -1,0 +1,59 @@
+---
+title: Your first preview using compose
+description: Learn how to integrate with GitHub pull requests to create your first automatic preview.
+icon: "1"
+---
+
+Ergomake uses `docker-compose.yml` files to set up previews.
+
+In this page, you'll learn how to set-up your first preview using a `docker-compose.yml` file.
+
+## Getting started
+
+1. [Log into the Ergomake dashboard](https://app.ergomake.dev).
+2. Select the desired organization and click the "Add Repository" button.
+3. During the installation process, you'll be prompted to give it access to the repository for which you want to generate previews.
+   **Make sure to select all the repositories you need**.
+
+    > ⚠️ Ergomake can't generate previews if it doesn't have access to a repository.
+
+4. Open a pull request adding a `docker-compose.yml` file to a `.ergomake` folder in the root of your repository.
+
+    > At this point, you should already receive a preview link in this pull request.
+
+    ```yml
+    # Here's an example docker-compose.yml file
+    version: "3.8"
+    services:
+      # On pull-requests, Ergomake can build your own images
+      web:
+        build: ./frontend
+        ports:
+          - "8080:8080"
+         labels:
+           # This label will cause Ergomake to set, during build time,
+           # REACT_APP_API_URL to the address of the API service (https),
+           # followed by "/prefix"
+           dev.ergomake.env.replace-arg.REACT_APP_API_URL: 'https://{{ services.api.url }}/api'
+
+      # You can build a second repository by referencing a folder with
+      # the desired repository name in a path *outside* your current repository.
+      api:
+        build: ../../my-backend-repo
+        ports:
+          - "3001:3001"
+
+      database:
+        image: mongo
+        environment:
+          MONGODB_INITDB_ROOT_USERNAME: username
+          MONGODB_INITDB_ROOT_PASSWORD: password
+    ```
+
+5. Merge Ergomake's PR once you're happy with how the preview looks.
+
+## Writing Dockerfiles
+
+Writing Dockerfiles tends to be the most difficult part of setting up previews using `docker-compose.yml`.
+
+To learn more about how to write them, see [_Writing Dockerfiles_](./writing-dockerfiles.md).
