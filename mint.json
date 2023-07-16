@@ -34,14 +34,19 @@
     },
     "anchors": [
         {
-            "name": "Community",
-            "icon": "discord",
-            "url": "https://discord.gg/daGzchUGDt"
+            "name": "Github",
+            "icon": "github",
+            "url": "https://github.com/ergomake/ergomake"
         },
         {
             "name": "Blog",
             "icon": "memo",
             "url": "https://ergomake.dev/blog"
+        },
+        {
+            "name": "Community",
+            "icon": "discord",
+            "url": "https://discord.gg/daGzchUGDt"
         }
     ],
     "navigation": [
