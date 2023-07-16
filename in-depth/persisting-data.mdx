@@ -1,0 +1,22 @@
+---
+id: persisting-data
+title: Persisting data
+description: How to persist data as you update branches.
+icon: "floppy-disk"
+---
+
+Whenever you delete an environment, Ergomake will delete all of its data.
+
+Currently, there's no way of persisting data across environments. Still, we do _not_ recommend connecting Ergomake to a "Staging" or "Production" database.
+
+<Warning>
+You will also lose data when updating a pull request containing an associated enviroment. That's because pushing changes will cause the environment to be recreated.
+
+Assume you have a Postgres instance in your preview environment, for example. In that case, if you add an item to the database as you're using the preview environment, that item will be deleted by Ergomake whenever you update the branch associated to the PR that created the environment.
+
+</Warning>
+
+<Info>
+    We're currently working on persistance mechanisms. If that's a feature you
+    need, email us at contact@getergomake.com.
+</Info>

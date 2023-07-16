@@ -62,6 +62,15 @@
                 "configurations/managing-resources",
                 "configurations/troubleshooting"
             ]
+        },
+        {
+            "group": "Environments in-depth",
+            "pages": [
+                "in-depth/lifecycle",
+                "in-depth/logs",
+                "in-depth/persisting-data",
+                "in-depth/authentication-and-permissions"
+            ]
         }
     ],
     "footerSocials": {

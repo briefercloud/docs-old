@@ -1,0 +1,31 @@
+---
+id: logs
+title: Logs
+description: Learn how to check your environment's logs
+icon: "line-columns"
+---
+
+To see build and live logs from your previews, you'll have to log into [the dashboard](https://app.ergomake.dev).
+
+There, you will see a list of repositories and their respective environments. For each environment, you'll be able to see its latest build and live logs, as shown below.
+
+<img
+    className="block dark:hidden"
+    src="/images/logs-light.png"
+    alt="Logs light"
+/>
+
+<img
+    className="hidden dark:block"
+    src="/images/logs-dark.png"
+    alt="Logs dark"
+/>
+
+Sometimes we may succeed in building your images but there may be a problem with your runtime set up. In that case, please see your environment's live logs to fix your configurations.
+
+<Note>
+Database seeds are a common cause of failure. If your seeds are trying to create a database that already exists every time, that could cause problems.
+
+Sometimes users may miss necessary environment variables for the applications to run too, causing them not to be able to start, even though the build was successful.
+
+</Note>

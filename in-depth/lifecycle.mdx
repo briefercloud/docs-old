@@ -1,0 +1,58 @@
+---
+id: lifecycle
+title: Preview lifecycle
+description: Managing preview environments and their lifetimes.
+icon: "clock"
+---
+
+Ergomake Previews have the same lifetime as your pull-request, unless configured as _permanent branches_.
+
+Ergomake preview environments are typically created when you open a pull-request, regardless of whether it's a draft.
+
+For every pull-request, Ergomake will use the `docker-compose.yml` file in your repository's `.ergomake` folder to create an environment and send you a link.
+
+Whenever you push a commit to that pull-request's branch, Ergomake will destroy the old environment and create a brand new one.
+
+<Warning>
+Every time an environment is re-created, you'll lose the data stored in the previous environment.
+
+Currently, there's no way to persist data between multiple environments.
+
+You'll have to write seed scripts with the data you need to get into a repository.
+
+</Warning>
+
+Once a pull-request gets merged, Ergomake will destroy the environment associated with the PR's branch, including its data, unless the PR's branch is configured as a permanent _branch_.
+
+<Note>
+Environments get destroyed when a pull-request gets merged, _not_ when the branch associated to it gets deleted.
+
+If you merge a PR but do not delete the branch associated with it, the environment will still be destroyed.
+
+</Note>
+
+## Permanent branches
+
+Permanent branches are branches whose corresponding environments should _always_ exist, regardless of whether there's an open pull request for them.
+
+You can configure _permanent branches_ by logging into [the dashboard](https://app.ergomake.dev).
+
+There, you'll be able to select a repository and configure
+
+<img
+    className="block dark:hidden"
+    src="/images/permanent-branches-light.png"
+    alt="Permanent branches light"
+/>
+
+<img
+    className="hidden dark:block"
+    src="/images/permanent-branches-dark.png"
+    alt="Permanent branches dark"
+/>
+
+## Sleeping environments
+
+Whenever environments are inactive for the past hour, they'll be put to sleep.
+
+If you're at the limit of simultaneous active environments, accessing a new environment will cause the least recently active environment to be put to sleep.

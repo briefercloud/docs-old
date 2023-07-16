@@ -1,0 +1,25 @@
+---
+id: authentication-and-permissions
+title: Authentication and permissions
+description: Learn how Ergomake determines who is who and who accesses what.
+icon: "users"
+---
+
+Ergomake's permissions system is tied to a GitHub organization. As long as a user has access to an organization, they'll have access to that organization's environments list.
+
+<Note>
+Ergomake can only access organizations to which you grant it access.
+
+That authorization grant is done during the GitHub login, through the button indicated in the image below.
+
+![](/images/org_grant.png)
+
+</Note>
+
+If you can't see your organization in the accounts selector, click the "Add account" button and grant Ergomake access to it.
+
+<Warning>We do not support GitLab or BitBucket.</Warning>
+
+## Known Limitations
+
+There is no fine grained control for members within an organisation or within a repo. Anyone able to open a pull-request in a repository for which Ergomake is configured will be able to spin-up a preview.
