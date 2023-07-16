@@ -77,6 +77,26 @@ These secrets and environment variables usually come in the form of a `.env` fil
 
 To configure these runtime environment variables, you must select the repository for which you want the runtime variables to be set. Then, you should click the "Environment Variables" tab on the upper right corner, and add the desired variable.
 
-![](../../static/img/manage-variables.png)
+<img
+    className="block dark:hidden"
+    src="/images/environment-variables-light.png"
+    alt="Environment variables light"
+/>
+
+<img
+    className="hidden dark:block"
+    src="/images/environment-variables-dark.png"
+    alt="Environment variables dark"
+/>
 
 <Info>All runtime variables are encrypted at rest.</Info>
+
+## Branch-specific environment variables
+
+You set environment variables for a specific branch by typing a branch name into the environment variables form.
+
+When the branch name field is left empty, the environment variable will apply to _all_ branches.
+
+When filled, the environment variable will only apply to that particular branch.
+
+Branch-specific environment variables take precedence over environment variables set for all branches. For example, if you set `MY_VAR` as `foo` for all branches and `MY_VAR` as `bar` for branch `staging`, the value of `MY_VAR` in `staging` environments will be `bar`.

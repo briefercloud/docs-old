@@ -24,13 +24,33 @@ Start with the simplest possible `docker-compose.yml` file.
 
 As Ergomake builds your application, you can click the `Details` link on GitHub to see any build logs you may have.
 
-![](../../static/img/build-details.png)
+<img
+    className="block dark:hidden"
+    src="/images/details-light.png"
+    alt="PR details light"
+/>
+
+<img
+    className="hidden dark:block"
+    src="/images/details-dark.png"
+    alt="PR details dark"
+/>
 
 For any images being built by Ergomake, you'll have complete build logs.
 
 There, you can check whether there's any failure related to building your `Dockerfile`.
 
-![](../../static/img/build-logs.png)
+<img
+    className="block dark:hidden"
+    src="/images/build-logs-light.png"
+    alt="build logs light"
+/>
+
+<img
+    className="block dark:hidden"
+    src="/images/build-logs-dark.png"
+    alt="build logs dark"
+/>
 
 <Note>
 Build failures are usually due to builds consuming too much memory or missing files which may exist on your machine, but that haven't been committed to GitHub.
@@ -42,7 +62,6 @@ It may also be the case that you're missing [environment variables](/configurati
 ## Check your runtime logs
 
 Once your Dockerfiles are built, Ergomake will start your applications. To see your application's runtime logs, click the `Live` button on the details panel for your environment, which you'll find by logging into [the Ergomake dashboard](https://app.ergomake.dev).
-![](../../static/img/live-logs.png)
 
 <Note>
 Runtime failures are usually due to missing environment variables or misconfigured initialization or seed scripts, which may be causing the container to fail every time it tries to restart.
