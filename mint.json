@@ -47,13 +47,11 @@
     "navigation": [
         {
             "group": "Get Started",
-            "pages": ["introduction"]
+            "pages": ["introduction", "your-first-preview", "dockerfiles"]
         },
         {
             "group": "Configurations",
             "pages": [
-                "configurations/your-first-preview",
-                "configurations/dockerfiles",
                 "configurations/environment-variables",
                 "configurations/multiple-repos",
                 "configurations/third-party-software",

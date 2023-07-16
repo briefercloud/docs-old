@@ -1,6 +1,7 @@
 ---
 title: Introduction
 description: "Set up your first preview"
+icon: "info"
 ---
 
 Every time a developer opens a pull request, Ergomake deploys a preview environment and adds a link to your pull request.
@@ -39,53 +40,41 @@ After you merge your pull-request, the environment gets destroyed.
 Learn how to configure previw environments for your application.
 
 <CardGroup cols={2}>
-    <Card
-        title="Edit Your Docs"
-        icon="pen-to-square"
-        href="https://mintlify.com/docs/quickstart"
-    >
-        Get your docs set up locally for easy development
+    <Card title="Create your first preview" icon="1" href="/your-first-preview">
+        Learn how to integrate with GitHub pull requests to create your first
+        automatic preview.
     </Card>
     <Card
-        title="Preview Changes"
-        icon="image"
-        href="https://mintlify.com/docs/development"
+        title="Environment variables and secrets"
+        icon="key"
+        href="/configurations/environment-variables"
     >
-        Preview your changes before you push to make sure they're perfect
-    </Card>
-</CardGroup>
-
-## Make it yours
-
-Update your docs to your brand and add valuable content for the best user conversion.
-
-<CardGroup cols={2}>
-    <Card
-        title="Customize Style"
-        icon="palette"
-        href="https://mintlify.com/docs/settings/global"
-    >
-        Customize your docs to your company's colors and brands
+        How to manage environment variables for build and runtime.
     </Card>
     <Card
-        title="Reference APIs"
-        icon="code"
-        href="https://mintlify.com/docs/api-playground/openapi"
+        title="Networking"
+        icon="network-wired"
+        href="/configurations/networking"
     >
-        Automatically generate endpoints from an OpenAPI spec
+        Learn about how Ergomake routes requests to and within environments.
     </Card>
     <Card
-        title="Add Components"
-        icon="screwdriver-wrench"
-        href="https://mintlify.com/docs/components/accordion"
+        title="Multiple repositories"
+        icon="rectangle-vertical-history"
+        href="/configurations/multiple-repos"
     >
-        Build interactive features and designs to guide your users
+        Learn how to setup Ergomake if you need to spin-up previews with
+        multiple repos.
     </Card>
     <Card
-        title="Get Inspiration"
-        icon="stars"
-        href="https://mintlify.com/showcase"
+        title="Databases and other third-party software"
+        icon="database"
+        href="/configurations/third-party-software"
     >
-        Check out our showcase of our favorite documentation
+        Learn how to set up databases and other pieces of third-party software
+        upon which your preview environment depends.
+    </Card>
+    <Card title="Seeding" icon="seedling" href="/configurations/seeding">
+        Learn how to seed your databases.
     </Card>
 </CardGroup>
