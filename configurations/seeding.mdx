@@ -13,7 +13,7 @@ In most cases, using a built image with a seed script is the easiest way to seed
 
 ### Mongo example
 
-If you're using MongoDB, you can create a `Dockerfile` using the `mongo` image as the base image, and copy the necessary seed files to the `/docker-entrypoint-initdb.d` path within that image. Any files within that path will be automatically executed by the image when the `mongo` service starts.
+If you're using MongoDB, you can create a `Dockerfile` using [the `mongo` image](https://hub.docker.com/_/mongo/) as the base image, and copy the necessary seed files to the `/docker-entrypoint-initdb.d` path within that image. Any files within that path will be automatically executed by the image when the `mongo` service starts.
 
 Assume you have the seed script below, named `seed.js` within a `scripts` folder, for example.
 
