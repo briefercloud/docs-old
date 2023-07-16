@@ -18,6 +18,7 @@
             "to": "#1E5E46"
         }
     },
+    "backgroundImage": "https://ergomake.dev/img/gradient.png",
     "topbarLinks": [
         {
             "name": "Dashboard",
@@ -86,5 +87,8 @@
         "plausible": {
             "domain": "docs.ergomake.dev"
         }
+    },
+    "modeToggle": {
+        "default": "dark"
     }
 }
